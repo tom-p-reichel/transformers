@@ -1107,6 +1107,25 @@ class LlamaModel(LlamaPreTrainedModel):
 
         return causal_mask
 
+class LlamaForSearch(LlamaModel):
+    def forward(self,key=None,value=None,value_attention_mask=None,labels=None,key_attention_mask=None,**kwargs):
+        if key is None:
+            raise ValueError("need key to search!")
+        
+        base_output = super().forward(key,attention_mask=key_attention_mask)
+        vectors = base_output.last_hidden_state[:,-1,:]
+        
+        loss = None
+        if value is not None:
+            if labels is None:
+                raise ValueError("need value AND label")
+            loss= ((nn.CosineSimilarity()(vectors,self.forward(value,key_attention_mask=value_attention_mask).vectors) - labels)**2).mean()
+                
+        return SearchModelOutputWithPast(**base_output,vectors=vectors,loss=loss)
+
+
+
+
 
 class LlamaForCausalLM(LlamaPreTrainedModel):
     _tied_weights_keys = ["lm_head.weight"]

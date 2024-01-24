@@ -158,6 +158,13 @@ class BaseModelOutputWithPast(ModelOutput):
     hidden_states: Optional[Tuple[torch.FloatTensor, ...]] = None
     attentions: Optional[Tuple[torch.FloatTensor, ...]] = None
 
+@dataclass
+class SearchModelOutputWithPast(BaseModelOutputWithPast):
+    loss : torch.FloatTensor = None
+    vectors : torch.FloatTensor= None
+
+
+
 
 @dataclass
 class BaseModelOutputWithCrossAttentions(ModelOutput):
